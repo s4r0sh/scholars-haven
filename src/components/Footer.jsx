@@ -20,7 +20,7 @@ export default function Footer() {
           variant="h6"
           sx={{ fontWeight: "bold", mb: 2, color: "#fff" }}
         >
-          <Box component="span" sx={{ color: "#28d2e4" }}>
+          <Box component="span" sx={{ color: "#fbdb75" }}>
             Scholars'
           </Box>{" "}
           <Box component="span" sx={{ color: "#fbdb75" }}>
@@ -40,7 +40,9 @@ export default function Footer() {
         >
           <IconButton
             component={Link}
-            href="#"
+            href="https://www.facebook.com/scholarshavenofficial"
+            target="_blank"
+            rel="noopener noreferrer"
             sx={{
               color: "#fff",
               bgcolor: "#28d2e4",
@@ -49,9 +51,12 @@ export default function Footer() {
           >
             <Facebook />
           </IconButton>
+
           <IconButton
             component={Link}
-            href="#"
+            href="https://www.instagram.com/scholarshaven_"
+            target="_blank"
+            rel="noopener noreferrer"
             sx={{
               color: "#fff",
               bgcolor: "#28d2e4",
@@ -60,9 +65,12 @@ export default function Footer() {
           >
             <Instagram />
           </IconButton>
+
           <IconButton
             component={Link}
-            href="#"
+            href="https://www.linkedin.com/in/fatima-hayat-2b0725232?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app"
+            target="_blank"
+            rel="noopener noreferrer"
             sx={{
               color: "#fff",
               bgcolor: "#28d2e4",
@@ -71,9 +79,10 @@ export default function Footer() {
           >
             <LinkedIn />
           </IconButton>
+
           <IconButton
             component={Link}
-            href="mailto:youremail@example.com"
+            href="mailto:scholars_haven@outlook.com"
             sx={{
               color: "#fff",
               bgcolor: "#28d2e4",
