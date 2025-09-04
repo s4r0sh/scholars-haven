@@ -3,6 +3,7 @@ import Navbar from "./components/Navbar";
 import Cover from "./components/Cover";
 import About from "./components/About";
 import Services from "./components/Services";
+import Testimonials from "./components/Testimonials";
 import Contact from "./components/Contact";
 import Footer from "./components/Footer";
 import { Box } from "@mui/material";
@@ -21,9 +22,13 @@ export default function App() {
       <Box id="services">
         <Services />
       </Box>
+      <Box id="testimonials">
+        <Testimonials />
+      </Box>
       <Box id="contact">
         <Contact />
       </Box>
+
       <Box id="footer">
         <Footer />
       </Box>
