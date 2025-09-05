@@ -9,6 +9,8 @@ import {
   Button,
 } from "@mui/material";
 
+import { Fade } from "@mui/material";
+
 import huzaifa from "../assets/huzaifa.jpg";
 import inshera from "../assets/inshera.jpg";
 
@@ -64,35 +66,38 @@ export default function Testimonials() {
           textAlign: "center",
           border: "3px solid #f48d65",
           boxShadow: "none",
-          height: { xs: "auto", md: 360 }, // equal height on medium+ screens
+          minHeight: { xs: 420, md: 380 }, // 🔹 consistent height
           display: "flex",
           flexDirection: "column",
           justifyContent: "center",
-          transition: "all 0.6s ease-in-out", // smooth transition
         }}
       >
-        <Avatar
-          src={testimonials[activeStep].img}
-          alt={testimonials[activeStep].name}
-          sx={{ width: 80, height: 80, mx: "auto", mb: 2 }}
-        />
-        <CardContent>
-          <Typography variant="body1" sx={{ mb: 2, fontStyle: "italic" }}>
-            "{testimonials[activeStep].text}"
-          </Typography>
-          <Typography
-            variant="subtitle1"
-            sx={{ fontWeight: "bold", color: "#f48d65" }} // Orange name
-          >
-            {testimonials[activeStep].name}
-          </Typography>
-          <Typography
-            variant="body2"
-            sx={{ color: "#f48d65", fontWeight: 500 }} // Cyan subject
-          >
-            {testimonials[activeStep].subject}
-          </Typography>
-        </CardContent>
+        <Fade in key={activeStep} timeout={1200}>
+          <Box>
+            <Avatar
+              src={testimonials[activeStep].img}
+              alt={testimonials[activeStep].name}
+              sx={{ width: 80, height: 80, mx: "auto", mb: 2 }}
+            />
+            <CardContent>
+              <Typography variant="body1" sx={{ mb: 2, fontStyle: "italic" }}>
+                "{testimonials[activeStep].text}"
+              </Typography>
+              <Typography
+                variant="subtitle1"
+                sx={{ fontWeight: "bold", color: "#f48d65" }}
+              >
+                {testimonials[activeStep].name}
+              </Typography>
+              <Typography
+                variant="body2"
+                sx={{ color: "#f48d65", fontWeight: 500 }}
+              >
+                {testimonials[activeStep].subject}
+              </Typography>
+            </CardContent>
+          </Box>
+        </Fade>
       </Card>
 
       <MobileStepper
