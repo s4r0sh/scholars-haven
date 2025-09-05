@@ -68,22 +68,24 @@ export default function About() {
           >
             I graduated at the top of my class with a degree in{" "}
             <Box component="span" sx={{ color: "#28d2e4", fontWeight: "600" }}>
-              Biochemistry
+              Biotechnology
             </Box>
             , driven by a passion for understanding life at the molecular level.
-            For the past eight years, I have dedicated myself to teaching{" "}
-            <Box component="span" sx={{ color: "#fbdb75", fontWeight: "600" }}>
+            Being a Conventarian myself, I understand the pressures faced by
+            students in first-rate schools and know how to navigate them to take
+            a balanced approach to life and studies. For the past eight years, I
+            have dedicated myself to teaching{" "}
+            <Box component="span" sx={{ color: "#f48d65", fontWeight: "600" }}>
               Chemistry
             </Box>{" "}
             and{" "}
             <Box component="span" sx={{ color: "#f48d65", fontWeight: "600" }}>
               Biology
             </Box>{" "}
-            to Cambridge and Edexcel O and A Level students, helping them grasp
-            complex concepts with clarity and confidence. My approach combines
-            subject expertise with proven exam strategies, enabling students not
-            only to improve their grades but also to build a genuine love for
-            science.
+            to O and A Levels students, helping them grasp complex concepts with
+            clarity and confidence. My approach combines subject expertise with
+            proven exam strategies, enabling students not only to improve their
+            grades but also to build a genuine love for science.
           </Typography>
 
           {/* Exam Boards Chips */}
