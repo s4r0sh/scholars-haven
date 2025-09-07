@@ -128,11 +128,12 @@ export default function Navbar() {
           <Box
             sx={{
               width: 220,
-              bgcolor: "#fbdb75", // yellow background
+              bgcolor: "#fbdb75",
               height: "100%",
               p: 2,
               display: "flex",
               flexDirection: "column",
+              position: "relative", // needed for absolute footer
             }}
           >
             {/* Close Button */}
@@ -142,6 +143,7 @@ export default function Navbar() {
               </IconButton>
             </Box>
 
+            {/* Links */}
             <List sx={{ flexGrow: 1 }}>
               {navLinks.map((link) => (
                 <ListItem
@@ -189,6 +191,25 @@ export default function Navbar() {
                 <ListItemText primary="Book a Free Demo" />
               </ListItem>
             </List>
+
+            {/* Footer - pinned at bottom */}
+            <Box
+              sx={{
+                position: "absolute",
+                bottom: 16,
+                left: 0,
+                width: "100%",
+                textAlign: "center",
+                color: "#e65100",
+                fontWeight: "bold",
+              }}
+            >
+              <Typography variant="body2">
+                © 2025 Scholars' Haven
+                <br />
+                All rights reserved.
+              </Typography>
+            </Box>
           </Box>
         </Drawer>
       </Toolbar>
