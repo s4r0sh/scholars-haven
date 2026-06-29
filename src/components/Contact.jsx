@@ -13,26 +13,33 @@ export default function Contact() {
   const form = useRef();
   const [status, setStatus] = useState(null);
 
-  const sendEmail = (e) => {
-    e.preventDefault();
+  const sendEmail = async (e) => {
+  e.preventDefault();
 
-    emailjs
-      .sendForm(
-        "service_j6jngvc", // 🔹 replace with EmailJS service ID
-        "template_awkavnu", // 🔹 replace with EmailJS template ID
-        form.current,
-        "ApSvG38LO_jbNfsgU" // 🔹 replace with EmailJS public key
-      )
-      .then(
-        (result) => {
-          setStatus("success");
-          form.current.reset();
-        },
-        (error) => {
-          setStatus("error");
-        }
-      );
-  };
+  try {
+    // Email to you
+    await emailjs.sendForm(
+      "service_j6jngvc",
+      "template_awkavnu",
+      form.current,
+      "ApSvG38LO_jbNfsgU"
+    );
+
+    // Auto-reply to visitor
+    await emailjs.sendForm(
+      "service_j6jngvc",
+      "template_8w4syis",
+      form.current,
+      "ApSvG38LO_jbNfsgU"
+    );
+
+    setStatus("success");
+    form.current.reset();
+  } catch (error) {
+    console.error(error);
+    setStatus("error");
+  }
+};
 
   return (
     <Box
