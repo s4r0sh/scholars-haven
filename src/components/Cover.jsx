@@ -4,6 +4,7 @@ import { Typography, Box, Stack } from "@mui/material";
 import beaker from "../assets/beaker.svg";
 import dna from "../assets/dna2.svg";
 
+// Rocket points "up" (nose at top, exhaust at bottom) in its own local coordinates.
 function RocketSVG({ size }) {
   return (
     <svg viewBox="0 0 100 100" style={{ width: size, height: size, display: "block" }}>
@@ -22,25 +23,71 @@ function RocketSVG({ size }) {
   );
 }
 
-// Flies the rocket around an ellipse centered on its parent, alternating
-// in front of / behind the text depending on which half of the orbit it's in.
-function OrbitingRocket({ rx, ry, size, duration, sx }) {
-  const POINTS = 28;
-  const x = [];
-  const y = [];
-  const zIndex = [];
-  for (let i = 0; i <= POINTS; i++) {
-    const a = (i / POINTS) * Math.PI * 2;
-    x.push(Math.round(rx * Math.cos(a)));
-    y.push(Math.round(ry * Math.sin(a)));
-    zIndex.push(Math.sin(a) >= 0 ? 5 : 1); // front on the bottom half, behind on the top half
+// Builds a wobbly, irregular loop (not a perfect ellipse) around the origin.
+function buildOrbitPoints(rx, ry, count) {
+  const pts = [];
+  for (let i = 0; i <= count; i++) {
+    const a = (i / count) * Math.PI * 2;
+    // layered wobble so the path isn't a clean ellipse
+    const wobble = 1 + 0.16 * Math.sin(3 * a + 0.6) + 0.08 * Math.sin(5 * a);
+    pts.push({
+      x: rx * wobble * Math.cos(a),
+      y: ry * wobble * Math.sin(a),
+    });
   }
+  return pts;
+}
+
+// Flies the rocket around an irregular loop centered on its parent: nose points
+// the direction of travel, exhaust trails behind, and it alternates in front of /
+// behind the text depending on which half of the loop it's in. Leaves a dashed
+// trail along its own path.
+function OrbitingRocket({ rx, ry, size, duration, sx }) {
+  const COUNT = 48;
+  const pts = buildOrbitPoints(rx, ry, COUNT);
+
+  const x = pts.map((p) => Math.round(p.x));
+  const y = pts.map((p) => Math.round(p.y));
+  const zIndex = pts.map((p) => (p.y >= 0 ? 5 : 1));
+
+  // Rotation derived from the actual direction of travel between consecutive
+  // points, so the nose always leads and the exhaust always trails — works for
+  // any path shape, not just a perfect ellipse.
+  const rotate = pts.map((p, i) => {
+    const next = pts[(i + 1) % pts.length];
+    const dx = next.x - p.x;
+    const dy = next.y - p.y;
+    return (Math.atan2(dy, dx) * 180) / Math.PI + 90; // +90 because the SVG's nose points "up"
+  });
+
+  // Dashed trail: a static SVG path tracing the same loop the rocket flies.
+  const pad = size + 10;
+  const vbW = rx * 2.6 + pad;
+  const vbH = ry * 2.6 + pad;
+  const cx = vbW / 2;
+  const cy = vbH / 2;
+  const trailD =
+    pts.map((p, i) => `${i === 0 ? "M" : "L"} ${(cx + p.x).toFixed(1)} ${(cy + p.y).toFixed(1)}`).join(" ") + " Z";
 
   return (
     <Box sx={{ position: "absolute", top: "50%", left: "50%", ...sx }}>
+      <svg
+        viewBox={`0 0 ${vbW} ${vbH}`}
+        style={{
+          position: "absolute",
+          width: vbW,
+          height: vbH,
+          marginLeft: -vbW / 2,
+          marginTop: -vbH / 2,
+          zIndex: 2,
+          pointerEvents: "none",
+        }}
+      >
+        <path d={trailD} fill="none" stroke="#9aa5b1" strokeWidth="2" strokeDasharray="7 9" opacity="0.4" />
+      </svg>
       <motion.div
         style={{ position: "absolute", marginLeft: -size / 2, marginTop: -size / 2 }}
-        animate={{ x, y, zIndex }}
+        animate={{ x, y, rotate, zIndex }}
         transition={{ duration, repeat: Infinity, ease: "linear" }}
       >
         <RocketSVG size={size} />
@@ -60,7 +107,7 @@ export default function Cover() {
         justifyContent: "center",
         overflowX: "hidden",
         overflowY: "hidden",
-        pt: { xs: 10, md: 8 }, // clear the sticky navbar so bubbles have room to rise
+        pt: { xs: 10, md: 8 },
         pb: { xs: 6, md: 4 },
         boxSizing: "border-box",
       }}
@@ -72,10 +119,10 @@ export default function Cover() {
           flexWrap: "nowrap",
           alignItems: "center",
           justifyContent: "center",
-          gap: { xs: 3, md: 3 },
+          gap: { xs: 1, md: 6 },
           width: "100%",
           maxWidth: "1300px",
-          px: 2,
+          px: { xs: 2, md: 8 },
           mx: "auto",
         }}
       >
@@ -135,13 +182,13 @@ export default function Cover() {
             minWidth: 0,
             display: "flex",
             justifyContent: "center",
-            py: { xs: 5, md: 2 },
+            py: { xs: 1, md: 2 },
           }}
         >
-          {/* Desktop: giant oval orbit */}
-          <OrbitingRocket rx={210} ry={95} size={72} duration={9} sx={{ display: { xs: "none", md: "block" } }} />
-          {/* Mobile: small orbit hugging the text closely */}
-          <OrbitingRocket rx={95} ry={42} size={34} duration={6} sx={{ display: { xs: "block", md: "none" } }} />
+          {/* Desktop: giant, irregular oval orbit */}
+          <OrbitingRocket rx={210} ry={95} size={74} duration={10} sx={{ display: { xs: "none", md: "block" } }} />
+          {/* Mobile: smaller orbit hugging the text, bigger rocket than before */}
+          <OrbitingRocket rx={100} ry={46} size={50} duration={7} sx={{ display: { xs: "block", md: "none" } }} />
 
           <Box sx={{ position: "relative", zIndex: 3, textAlign: "center", maxWidth: 460 }}>
             <Typography
@@ -188,12 +235,12 @@ export default function Cover() {
           </Box>
         </Box>
 
-        {/* Biology: DNA (right flank on desktop, last on mobile) */}
+        {/* Biology: DNA — bigger now (right flank on desktop, last on mobile) */}
         <Box sx={{ flex: "0 0 auto", textAlign: "center" }}>
           <motion.img
             src={dna}
             alt="dna helix"
-            style={{ width: 190, height: 190 }}
+            style={{ width: 240, height: 240 }}
             animate={{ rotate: 360 }}
             transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
           />
