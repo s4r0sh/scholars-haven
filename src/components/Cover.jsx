@@ -96,7 +96,7 @@ export default function Cover() {
           </Box>
         </Grid>
 
-        {/* Middle: Headline + tagline + exam boards */}
+        {/* Middle: Headline + tagline + levels */}
         <Grid item xs={12} md={4} sx={{ textAlign: "center" }}>
           <Typography
             variant="h3"
@@ -105,21 +105,19 @@ export default function Cover() {
             sx={{ fontSize: { xs: "1.6rem", sm: "2rem", md: "2.2rem" } }}
           >
             <Box component="span" sx={{ color: "#28d2e4", mr: 1 }}>
-              Making
+              Understand
             </Box>
-            <Box component="span" sx={{ color: "#fbdb75", mr: 1 }}>
-              Science
-            </Box>
-            <Box component="span" sx={{ color: "#f48d65" }}>
-              Simple
+            <Box component="span" sx={{ color: "#fbdb75" }}>
+              STEM.
             </Box>
           </Typography>
 
           <Typography variant="h6" gutterBottom>
-            O & A Level Chemistry and Biology tutoring made engaging and easy.
+            Don't just memorise it — personalised Mathematics, Physics, Chemistry and
+            Biology tutoring, taught by real teachers.
           </Typography>
 
-          {/* Exam board badges */}
+          {/* Levels badges */}
           <Stack
             direction="row"
             justifyContent="center"
@@ -127,25 +125,19 @@ export default function Cover() {
             sx={{ mt: 2, flexWrap: "wrap" }}
           >
             <Typography variant="subtitle1" sx={{ color: "#28d2e4" }}>
-              Cambridge
+              GCSE
             </Typography>
             <Typography variant="subtitle1" sx={{ color: "#fbdb75" }}>
               |
             </Typography>
             <Typography variant="subtitle1" sx={{ color: "#f48d65" }}>
-              Edexcel
+              IGCSE
             </Typography>
             <Typography variant="subtitle1" sx={{ color: "#fbdb75" }}>
               |
             </Typography>
             <Typography variant="subtitle1" sx={{ color: "#28d2e4" }}>
-              AQA
-            </Typography>
-            <Typography variant="subtitle1" sx={{ color: "#fbdb75" }}>
-              |
-            </Typography>
-            <Typography variant="subtitle1" sx={{ color: "#f48d65" }}>
-              OCR
+              AS & A Level
             </Typography>
           </Stack>
         </Grid>
