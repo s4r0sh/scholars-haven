@@ -76,6 +76,24 @@ export default function Contact() {
       .then(
         () => {
           setStatus("success");
+
+          // Fire conversion events for the ad campaign (Meta Pixel + GA4).
+          // Safe no-ops until the real Pixel/GA4 IDs are added in index.html.
+          if (typeof window !== "undefined") {
+            if (window.fbq) {
+              window.fbq("track", "Lead", {
+                content_name: form.subject,
+                content_category: form.level,
+              });
+            }
+            if (window.gtag) {
+              window.gtag("event", "generate_lead", {
+                subject: form.subject,
+                level: form.level,
+              });
+            }
+          }
+
           setForm(initialForm);
           setSending(false);
         },
