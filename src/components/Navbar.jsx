@@ -27,7 +27,8 @@ export default function Navbar() {
     };
 
   const navLinks = [
-    { label: "About", id: "about" },
+    { label: "Subjects", id: "subjects" },
+    { label: "Teachers", id: "teachers" },
     { label: "Services", id: "services" },
     { label: "Contact", id: "contact" },
   ];
