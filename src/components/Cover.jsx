@@ -4,7 +4,7 @@ import { Typography, Box, Stack } from "@mui/material";
 import beaker from "../assets/beaker.svg";
 import dna from "../assets/dna2.svg";
 
-const GREEK = ["\u03c0", "\u03a3", "\u03b8", "\u0394", "\u03bb", "\u03a9", "\u03c6", "\u03b1"];
+const GREEK = ["\u03c0", "\u03a3", "\u03b8", "\u0394", "\u03bb", "\u03a9", "\u03c6", "\u03b1", "\u222b"];
 
 // Irregular (wobbly) radius multiplier at angle a — shared by the rocket and its exhaust,
 // so everything follows the exact same non-uniform loop instead of a clean ellipse.
@@ -28,9 +28,9 @@ function RocketSVG({ size }) {
   );
 }
 
-// One exhaust symbol: trails the rocket by `delaySeconds`, along the exact same path,
-// visible only for a short `life` window right after it's "emitted" — it grows then
-// fades to nothing well before the rocket could ever lap back around to it.
+// One exhaust symbol: trails the rocket by `delaySeconds`, along the exact same path.
+// It appears small, grows steadily larger over its whole life, and fades out near the
+// end — with enough life span to actually be readable before it disappears.
 function ExhaustPuff({ rx, ry, size, time, duration, steps, delaySeconds, life, symbol }) {
   const lagProgress = useTransform(time, (t) => {
     const raw = (((t / 1000 - delaySeconds) / duration) % 1 + 1) % 1;
@@ -45,8 +45,9 @@ function ExhaustPuff({ rx, ry, size, time, duration, steps, delaySeconds, life, 
     const cyclePos = (((t / 1000 - delaySeconds) % duration) + duration) % duration;
     return Math.min(cyclePos / life, 1);
   });
-  const opacity = useTransform(age, [0, 0.15, 0.7, 1], [0, 0.9, 0.5, 0]);
-  const scale = useTransform(age, [0, 1], [0.5, 1.9]);
+  // small -> grows slowly across most of its life -> fades only near the very end
+  const opacity = useTransform(age, [0, 0.12, 0.8, 1], [0, 0.9, 0.85, 0]);
+  const scale = useTransform(age, [0, 1], [0.35, 2.3]);
 
   return (
     <motion.div
@@ -75,9 +76,9 @@ function ExhaustPuff({ rx, ry, size, time, duration, steps, delaySeconds, life, 
 // by a continuously-computed parametric function (not preset keyframes), so rotation
 // is always the true instantaneous direction of travel — no wraparound, no somersault.
 // Progress is quantized into discrete steps so the motion visibly moves in small
-// increments rather than gliding smoothly. Exhaust is a trail of Greek symbols that
-// spawn near the tail, grow, and fade out.
-function OrbitingRocket({ rx, ry, size, duration, steps = 16, sx }) {
+// increments rather than gliding smoothly. A steady stream of Greek symbols trails
+// out of the exhaust continuously around the whole loop, each growing then fading.
+function OrbitingRocket({ rx, ry, size, duration, steps = 30, sx }) {
   const time = useTime();
   const rawProgress = useTransform(time, (t) => (t / 1000 / duration) % 1);
   const progress = useTransform(rawProgress, (p) => Math.floor(p * steps) / steps);
@@ -93,9 +94,13 @@ function OrbitingRocket({ rx, ry, size, duration, steps = 16, sx }) {
     return (Math.atan2(p2.y - p1.y, p2.x - p1.x) * 180) / Math.PI + 90; // +90: SVG nose points "up"
   });
 
-  const puffCount = 5;
-  const puffLife = duration / 7;
-  const puffLag = duration / 4;
+  // Spread emission evenly across the FULL loop (not just an early slice of it) so
+  // symbols are streaming out continuously no matter where the rocket currently is,
+  // and give each one a life comfortably longer than the gap between spawns so
+  // there's always at least one or two visible.
+  const puffCount = 9;
+  const puffLife = (duration / puffCount) * 2.2;
+  const puffLag = duration;
 
   return (
     <Box sx={{ position: "absolute", top: "50%", left: "50%", ...sx }}>
@@ -221,8 +226,8 @@ export default function Cover() {
         >
           {/* Desktop: giant, irregular oval orbit */}
           <OrbitingRocket rx={210} ry={95} size={74} duration={10} sx={{ display: { xs: "none", md: "block" } }} />
-          {/* Mobile: bigger orbit now, wide enough to sweep around the headline too */}
-          <OrbitingRocket rx={125} ry={95} size={50} duration={8} sx={{ display: { xs: "block", md: "none" } }} />
+          {/* Mobile: enlarged further so it clearly sweeps around "Understand STEM." too */}
+          <OrbitingRocket rx={175} ry={145} size={50} duration={9} sx={{ display: { xs: "block", md: "none" } }} />
 
           <Box sx={{ position: "relative", zIndex: 3, textAlign: "center", maxWidth: 460 }}>
             <Typography
