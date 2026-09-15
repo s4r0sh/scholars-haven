@@ -4,7 +4,8 @@ import { Typography, Box, Stack } from "@mui/material";
 import beaker from "../assets/beaker.svg";
 import dna from "../assets/dna2.svg";
 
-const GREEK = ["\u03c0", "\u03a3", "\u03b8", "\u0394", "\u03bb", "\u03a9", "\u03c6", "\u03b1", "\u222b"];
+// 15 mathematical symbols — a mix of Greek letters and other math notation.
+const SYMBOLS = ["\u03c0", "\u03a3", "\u03b8", "\u0394", "\u03bb", "\u03a9", "\u03c6", "\u03b1", "\u222b", "\u221e", "\u221a", "\u2202", "\u00b1", "\u2207", "\u2248"];
 
 // Irregular (wobbly) radius multiplier at angle a — shared by the rocket and its exhaust,
 // so everything follows the exact same non-uniform loop instead of a clean ellipse.
@@ -19,50 +20,57 @@ function orbitXY(a, rx, ry) {
 // Rocket points "up" (nose at top, exhaust at bottom) in its own local coordinates.
 function RocketSVG({ size }) {
   return (
-    <svg viewBox="0 0 100 100" style={{ width: size, height: size, display: "block" }}>
+    <svg viewBox="0 0 100 100" style={{ width: size, height: size, display: "block", overflow: "visible" }}>
       <path d="M50 5 C65 20, 70 45, 65 65 L35 65 C30 45, 35 20, 50 5 Z" fill="#f48d65" />
       <circle cx="50" cy="35" r="8" fill="#fff" />
       <path d="M35 65 L20 85 L35 75 Z" fill="#28d2e4" />
       <path d="M65 65 L80 85 L65 75 Z" fill="#28d2e4" />
+      {/* exhaust flame */}
+      <motion.path
+        d="M42 65 L50 92 L58 65 Z"
+        fill="#fbdb75"
+        animate={{ scaleY: [1, 1.35, 1] }}
+        transition={{ duration: 0.4, repeat: Infinity, ease: "easeInOut" }}
+        style={{ transformOrigin: "50px 65px" }}
+      />
     </svg>
   );
 }
 
-// One exhaust symbol: trails the rocket by `delaySeconds`, along the exact same path.
-// It appears small, grows steadily larger over its whole life, and fades out near the
-// end — with enough life span to actually be readable before it disappears.
-function ExhaustPuff({ rx, ry, size, time, duration, steps, delaySeconds, life, symbol }) {
-  const lagProgress = useTransform(time, (t) => {
-    const raw = (((t / 1000 - delaySeconds) / duration) % 1 + 1) % 1;
-    return Math.floor(raw * steps) / steps;
-  });
-  const lagAngle = useTransform(lagProgress, (p) => p * Math.PI * 2);
-  const x = useTransform(lagAngle, (a) => orbitXY(a, rx, ry).x);
-  const y = useTransform(lagAngle, (a) => orbitXY(a, rx, ry).y);
-  const zIndex = useTransform(y, (yv) => (yv >= 0 ? 4 : 0));
+// One exhaust symbol: ejected from the flame at a fixed point on the loop (wherever the
+// rocket happens to be at that moment in its cycle). It does NOT keep travelling with the
+// rocket — it stays put right there, starts tiny, grows steadily larger, spins slowly, and
+// fades out toward the end of its life, before firing again next lap.
+function ExhaustSymbol({ rx, ry, size, time, duration, spawnAngle, delaySeconds, life, symbol }) {
+  const spawnPos = orbitXY(spawnAngle, rx, ry);
 
   const age = useTransform(time, (t) => {
     const cyclePos = (((t / 1000 - delaySeconds) % duration) + duration) % duration;
     return Math.min(cyclePos / life, 1);
   });
-  // small -> grows slowly across most of its life -> fades only near the very end
-  const opacity = useTransform(age, [0, 0.12, 0.8, 1], [0, 0.9, 0.85, 0]);
-  const scale = useTransform(age, [0, 1], [0.35, 2.3]);
+  // super tiny at birth, grows across most of its life, fades right at the end
+  const scale = useTransform(age, [0, 0.35, 1], [0.05, 0.9, 1.7]);
+  const opacity = useTransform(age, [0, 0.08, 0.82, 1], [0, 1, 1, 0]);
+  // slow continuous spin while it grows
+  const rotate = useTransform(age, (a) => a * 260);
+  const zIndex = spawnPos.y >= 0 ? 4 : 0;
 
   return (
     <motion.div
       style={{
         position: "absolute",
-        x,
-        y,
+        x: spawnPos.x,
+        y: spawnPos.y,
         marginLeft: -size * 0.22,
         marginTop: -size * 0.22,
         opacity,
         scale,
+        rotate,
         zIndex,
-        fontSize: size * 0.45,
-        fontWeight: 700,
-        color: "#8b95a1",
+        fontSize: size * 0.42,
+        fontWeight: 300,
+        fontFamily: "'Georgia', serif",
+        color: "#9aa5b1",
         pointerEvents: "none",
         userSelect: "none",
       }}
@@ -76,8 +84,8 @@ function ExhaustPuff({ rx, ry, size, time, duration, steps, delaySeconds, life, 
 // by a continuously-computed parametric function (not preset keyframes), so rotation
 // is always the true instantaneous direction of travel — no wraparound, no somersault.
 // Progress is quantized into discrete steps so the motion visibly moves in small
-// increments rather than gliding smoothly. A steady stream of Greek symbols trails
-// out of the exhaust continuously around the whole loop, each growing then fading.
+// increments rather than gliding smoothly. 15 math symbols are ejected from the exhaust
+// flame at fixed points all around the loop, each growing and slowly spinning in place.
 function OrbitingRocket({ rx, ry, size, duration, steps = 30, sx }) {
   const time = useTime();
   const rawProgress = useTransform(time, (t) => (t / 1000 / duration) % 1);
@@ -94,28 +102,23 @@ function OrbitingRocket({ rx, ry, size, duration, steps = 30, sx }) {
     return (Math.atan2(p2.y - p1.y, p2.x - p1.x) * 180) / Math.PI + 90; // +90: SVG nose points "up"
   });
 
-  // Spread emission evenly across the FULL loop (not just an early slice of it) so
-  // symbols are streaming out continuously no matter where the rocket currently is,
-  // and give each one a life comfortably longer than the gap between spawns so
-  // there's always at least one or two visible.
-  const puffCount = 9;
-  const puffLife = (duration / puffCount) * 2.2;
-  const puffLag = duration;
+  const puffCount = SYMBOLS.length;
+  const puffLife = duration * 0.55;
 
   return (
     <Box sx={{ position: "absolute", top: "50%", left: "50%", ...sx }}>
-      {Array.from({ length: puffCount }).map((_, i) => (
-        <ExhaustPuff
+      {SYMBOLS.map((symbol, i) => (
+        <ExhaustSymbol
           key={i}
           rx={rx}
           ry={ry}
           size={size}
           time={time}
           duration={duration}
-          steps={steps}
-          delaySeconds={(i / puffCount) * puffLag + 0.2}
+          spawnAngle={(i / puffCount) * Math.PI * 2}
+          delaySeconds={(i / puffCount) * duration}
           life={puffLife}
-          symbol={GREEK[i % GREEK.length]}
+          symbol={symbol}
         />
       ))}
       <motion.div
@@ -226,7 +229,7 @@ export default function Cover() {
         >
           {/* Desktop: giant, irregular oval orbit */}
           <OrbitingRocket rx={210} ry={95} size={74} duration={10} sx={{ display: { xs: "none", md: "block" } }} />
-          {/* Mobile: enlarged further so it clearly sweeps around "Understand STEM." too */}
+          {/* Mobile: enlarged so it clearly sweeps around "Understand STEM." too */}
           <OrbitingRocket rx={175} ry={145} size={50} duration={9} sx={{ display: { xs: "block", md: "none" } }} />
 
           <Box sx={{ position: "relative", zIndex: 3, textAlign: "center", maxWidth: 460 }}>
