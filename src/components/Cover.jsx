@@ -227,10 +227,10 @@ export default function Cover() {
             py: { xs: 0, md: 2 },
           }}
         >
-          {/* Desktop: giant, irregular oval orbit */}
-          <OrbitingRocket rx={210} ry={95} size={74} duration={10} sx={{ display: { xs: "none", md: "block" } }} />
-          {/* Mobile: enlarged so it clearly sweeps around "Understand STEM." too */}
-          <OrbitingRocket rx={175} ry={145} size={50} duration={9} sx={{ display: { xs: "block", md: "none" } }} />
+          {/* Desktop: giant, irregular oval orbit — rocket 50% bigger */}
+          <OrbitingRocket rx={210} ry={95} size={111} duration={10} sx={{ display: { xs: "none", md: "block" } }} />
+          {/* Mobile: enlarged orbit, rocket 100% bigger (double) */}
+          <OrbitingRocket rx={175} ry={145} size={100} duration={9} sx={{ display: { xs: "block", md: "none" } }} />
 
           <Box sx={{ position: "relative", zIndex: 3, textAlign: "center", maxWidth: 460 }}>
             <Typography
