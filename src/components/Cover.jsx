@@ -1,8 +1,20 @@
 import React from "react";
-import { motion } from "framer-motion";
+import { motion, useTime, useTransform } from "framer-motion";
 import { Typography, Box, Stack } from "@mui/material";
 import beaker from "../assets/beaker.svg";
 import dna from "../assets/dna2.svg";
+
+const GREEK = ["\u03c0", "\u03a3", "\u03b8", "\u0394", "\u03bb", "\u03a9", "\u03c6", "\u03b1"];
+
+// Irregular (wobbly) radius multiplier at angle a — shared by the rocket and its exhaust,
+// so everything follows the exact same non-uniform loop instead of a clean ellipse.
+function wobble(a) {
+  return 1 + 0.16 * Math.sin(3 * a + 0.6) + 0.08 * Math.sin(5 * a);
+}
+function orbitXY(a, rx, ry) {
+  const w = wobble(a);
+  return { x: rx * w * Math.cos(a), y: ry * w * Math.sin(a) };
+}
 
 // Rocket points "up" (nose at top, exhaust at bottom) in its own local coordinates.
 function RocketSVG({ size }) {
@@ -12,83 +24,105 @@ function RocketSVG({ size }) {
       <circle cx="50" cy="35" r="8" fill="#fff" />
       <path d="M35 65 L20 85 L35 75 Z" fill="#28d2e4" />
       <path d="M65 65 L80 85 L65 75 Z" fill="#28d2e4" />
-      <motion.path
-        d="M42 65 L50 90 L58 65 Z"
-        fill="#fbdb75"
-        animate={{ scaleY: [1, 1.3, 1] }}
-        transition={{ duration: 0.5, repeat: Infinity, ease: "easeInOut" }}
-        style={{ transformOrigin: "50px 65px" }}
-      />
     </svg>
   );
 }
 
-// Builds a wobbly, irregular loop (not a perfect ellipse) around the origin.
-function buildOrbitPoints(rx, ry, count) {
-  const pts = [];
-  for (let i = 0; i <= count; i++) {
-    const a = (i / count) * Math.PI * 2;
-    // layered wobble so the path isn't a clean ellipse
-    const wobble = 1 + 0.16 * Math.sin(3 * a + 0.6) + 0.08 * Math.sin(5 * a);
-    pts.push({
-      x: rx * wobble * Math.cos(a),
-      y: ry * wobble * Math.sin(a),
-    });
-  }
-  return pts;
+// One exhaust symbol: trails the rocket by `delaySeconds`, along the exact same path,
+// visible only for a short `life` window right after it's "emitted" — it grows then
+// fades to nothing well before the rocket could ever lap back around to it.
+function ExhaustPuff({ rx, ry, size, time, duration, steps, delaySeconds, life, symbol }) {
+  const lagProgress = useTransform(time, (t) => {
+    const raw = (((t / 1000 - delaySeconds) / duration) % 1 + 1) % 1;
+    return Math.floor(raw * steps) / steps;
+  });
+  const lagAngle = useTransform(lagProgress, (p) => p * Math.PI * 2);
+  const x = useTransform(lagAngle, (a) => orbitXY(a, rx, ry).x);
+  const y = useTransform(lagAngle, (a) => orbitXY(a, rx, ry).y);
+  const zIndex = useTransform(y, (yv) => (yv >= 0 ? 4 : 0));
+
+  const age = useTransform(time, (t) => {
+    const cyclePos = (((t / 1000 - delaySeconds) % duration) + duration) % duration;
+    return Math.min(cyclePos / life, 1);
+  });
+  const opacity = useTransform(age, [0, 0.15, 0.7, 1], [0, 0.9, 0.5, 0]);
+  const scale = useTransform(age, [0, 1], [0.5, 1.9]);
+
+  return (
+    <motion.div
+      style={{
+        position: "absolute",
+        x,
+        y,
+        marginLeft: -size * 0.22,
+        marginTop: -size * 0.22,
+        opacity,
+        scale,
+        zIndex,
+        fontSize: size * 0.45,
+        fontWeight: 700,
+        color: "#8b95a1",
+        pointerEvents: "none",
+        userSelect: "none",
+      }}
+    >
+      {symbol}
+    </motion.div>
+  );
 }
 
-// Flies the rocket around an irregular loop centered on its parent: nose points
-// the direction of travel, exhaust trails behind, and it alternates in front of /
-// behind the text depending on which half of the loop it's in. Leaves a dashed
-// trail along its own path.
-function OrbitingRocket({ rx, ry, size, duration, sx }) {
-  const COUNT = 48;
-  const pts = buildOrbitPoints(rx, ry, COUNT);
+// Flies the rocket around an irregular loop centered on its parent. Position is driven
+// by a continuously-computed parametric function (not preset keyframes), so rotation
+// is always the true instantaneous direction of travel — no wraparound, no somersault.
+// Progress is quantized into discrete steps so the motion visibly moves in small
+// increments rather than gliding smoothly. Exhaust is a trail of Greek symbols that
+// spawn near the tail, grow, and fade out.
+function OrbitingRocket({ rx, ry, size, duration, steps = 16, sx }) {
+  const time = useTime();
+  const rawProgress = useTransform(time, (t) => (t / 1000 / duration) % 1);
+  const progress = useTransform(rawProgress, (p) => Math.floor(p * steps) / steps);
+  const angle = useTransform(progress, (p) => p * Math.PI * 2);
 
-  const x = pts.map((p) => Math.round(p.x));
-  const y = pts.map((p) => Math.round(p.y));
-  const zIndex = pts.map((p) => (p.y >= 0 ? 5 : 1));
-
-  // Rotation derived from the actual direction of travel between consecutive
-  // points, so the nose always leads and the exhaust always trails — works for
-  // any path shape, not just a perfect ellipse.
-  const rotate = pts.map((p, i) => {
-    const next = pts[(i + 1) % pts.length];
-    const dx = next.x - p.x;
-    const dy = next.y - p.y;
-    return (Math.atan2(dy, dx) * 180) / Math.PI + 90; // +90 because the SVG's nose points "up"
+  const x = useTransform(angle, (a) => orbitXY(a, rx, ry).x);
+  const y = useTransform(angle, (a) => orbitXY(a, rx, ry).y);
+  const zIndex = useTransform(y, (yv) => (yv >= 0 ? 5 : 1));
+  const rotate = useTransform(angle, (a) => {
+    const EPS = 0.02;
+    const p1 = orbitXY(a, rx, ry);
+    const p2 = orbitXY(a + EPS, rx, ry);
+    return (Math.atan2(p2.y - p1.y, p2.x - p1.x) * 180) / Math.PI + 90; // +90: SVG nose points "up"
   });
 
-  // Dashed trail: a static SVG path tracing the same loop the rocket flies.
-  const pad = size + 10;
-  const vbW = rx * 2.6 + pad;
-  const vbH = ry * 2.6 + pad;
-  const cx = vbW / 2;
-  const cy = vbH / 2;
-  const trailD =
-    pts.map((p, i) => `${i === 0 ? "M" : "L"} ${(cx + p.x).toFixed(1)} ${(cy + p.y).toFixed(1)}`).join(" ") + " Z";
+  const puffCount = 5;
+  const puffLife = duration / 7;
+  const puffLag = duration / 4;
 
   return (
     <Box sx={{ position: "absolute", top: "50%", left: "50%", ...sx }}>
-      <svg
-        viewBox={`0 0 ${vbW} ${vbH}`}
+      {Array.from({ length: puffCount }).map((_, i) => (
+        <ExhaustPuff
+          key={i}
+          rx={rx}
+          ry={ry}
+          size={size}
+          time={time}
+          duration={duration}
+          steps={steps}
+          delaySeconds={(i / puffCount) * puffLag + 0.2}
+          life={puffLife}
+          symbol={GREEK[i % GREEK.length]}
+        />
+      ))}
+      <motion.div
         style={{
           position: "absolute",
-          width: vbW,
-          height: vbH,
-          marginLeft: -vbW / 2,
-          marginTop: -vbH / 2,
-          zIndex: 2,
-          pointerEvents: "none",
+          x,
+          y,
+          marginLeft: -size / 2,
+          marginTop: -size / 2,
+          rotate,
+          zIndex,
         }}
-      >
-        <path d={trailD} fill="none" stroke="#9aa5b1" strokeWidth="2" strokeDasharray="7 9" opacity="0.4" />
-      </svg>
-      <motion.div
-        style={{ position: "absolute", marginLeft: -size / 2, marginTop: -size / 2 }}
-        animate={{ x, y, rotate, zIndex }}
-        transition={{ duration, repeat: Infinity, ease: "linear" }}
       >
         <RocketSVG size={size} />
       </motion.div>
@@ -119,7 +153,7 @@ export default function Cover() {
           flexWrap: "nowrap",
           alignItems: "center",
           justifyContent: "center",
-          gap: { xs: 1, md: 6 },
+          gap: { xs: 4, md: 6 },
           width: "100%",
           maxWidth: "1300px",
           px: { xs: 2, md: 8 },
@@ -182,13 +216,13 @@ export default function Cover() {
             minWidth: 0,
             display: "flex",
             justifyContent: "center",
-            py: { xs: 1, md: 2 },
+            py: { xs: 0, md: 2 },
           }}
         >
           {/* Desktop: giant, irregular oval orbit */}
           <OrbitingRocket rx={210} ry={95} size={74} duration={10} sx={{ display: { xs: "none", md: "block" } }} />
-          {/* Mobile: smaller orbit hugging the text, bigger rocket than before */}
-          <OrbitingRocket rx={100} ry={46} size={50} duration={7} sx={{ display: { xs: "block", md: "none" } }} />
+          {/* Mobile: bigger orbit now, wide enough to sweep around the headline too */}
+          <OrbitingRocket rx={125} ry={95} size={50} duration={8} sx={{ display: { xs: "block", md: "none" } }} />
 
           <Box sx={{ position: "relative", zIndex: 3, textAlign: "center", maxWidth: 460 }}>
             <Typography
@@ -235,7 +269,7 @@ export default function Cover() {
           </Box>
         </Box>
 
-        {/* Biology: DNA — bigger now (right flank on desktop, last on mobile) */}
+        {/* Biology: DNA (right flank on desktop, last on mobile) */}
         <Box sx={{ flex: "0 0 auto", textAlign: "center" }}>
           <motion.img
             src={dna}
