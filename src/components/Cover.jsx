@@ -4,25 +4,13 @@ import { Typography, Box, Stack } from "@mui/material";
 import beaker from "../assets/beaker.svg";
 import dna from "../assets/dna2.svg";
 
-function Rocket() {
+function RocketSVG({ size }) {
   return (
-    <motion.svg
-      viewBox="0 0 100 100"
-      style={{ width: 130, height: 130 }}
-      animate={{ y: [0, -14, 0], rotate: [-4, 4, -4] }}
-      transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut" }}
-    >
-      {/* body */}
-      <path
-        d="M50 5 C65 20, 70 45, 65 65 L35 65 C30 45, 35 20, 50 5 Z"
-        fill="#f48d65"
-      />
-      {/* window */}
+    <svg viewBox="0 0 100 100" style={{ width: size, height: size, display: "block" }}>
+      <path d="M50 5 C65 20, 70 45, 65 65 L35 65 C30 45, 35 20, 50 5 Z" fill="#f48d65" />
       <circle cx="50" cy="35" r="8" fill="#fff" />
-      {/* fins */}
       <path d="M35 65 L20 85 L35 75 Z" fill="#28d2e4" />
       <path d="M65 65 L80 85 L65 75 Z" fill="#28d2e4" />
-      {/* flame */}
       <motion.path
         d="M42 65 L50 90 L58 65 Z"
         fill="#fbdb75"
@@ -30,7 +18,34 @@ function Rocket() {
         transition={{ duration: 0.5, repeat: Infinity, ease: "easeInOut" }}
         style={{ transformOrigin: "50px 65px" }}
       />
-    </motion.svg>
+    </svg>
+  );
+}
+
+// Flies the rocket around an ellipse centered on its parent, alternating
+// in front of / behind the text depending on which half of the orbit it's in.
+function OrbitingRocket({ rx, ry, size, duration, sx }) {
+  const POINTS = 28;
+  const x = [];
+  const y = [];
+  const zIndex = [];
+  for (let i = 0; i <= POINTS; i++) {
+    const a = (i / POINTS) * Math.PI * 2;
+    x.push(Math.round(rx * Math.cos(a)));
+    y.push(Math.round(ry * Math.sin(a)));
+    zIndex.push(Math.sin(a) >= 0 ? 5 : 1); // front on the bottom half, behind on the top half
+  }
+
+  return (
+    <Box sx={{ position: "absolute", top: "50%", left: "50%", ...sx }}>
+      <motion.div
+        style={{ position: "absolute", marginLeft: -size / 2, marginTop: -size / 2 }}
+        animate={{ x, y, zIndex }}
+        transition={{ duration, repeat: Infinity, ease: "linear" }}
+      >
+        <RocketSVG size={size} />
+      </motion.div>
+    </Box>
   );
 }
 
@@ -54,26 +69,19 @@ export default function Cover() {
         sx={{
           display: "flex",
           flexDirection: { xs: "column", md: "row" },
-          flexWrap: "nowrap", // guarantees a single row on desktop, no accidental wrap
+          flexWrap: "nowrap",
           alignItems: "center",
           justifyContent: "center",
-          gap: { xs: 5, md: 3 },
+          gap: { xs: 3, md: 3 },
           width: "100%",
           maxWidth: "1300px",
           px: 2,
           mx: "auto",
         }}
       >
-        {/* Chemistry: beaker + bubbles */}
+        {/* Chemistry: beaker + bubbles (left flank on desktop, first on mobile) */}
         <Box sx={{ flex: "0 0 auto", textAlign: "center" }}>
-          <Box
-            sx={{
-              position: "relative",
-              width: 190,
-              height: 280,
-              mx: "auto",
-            }}
-          >
+          <Box sx={{ position: "relative", width: 190, height: 280, mx: "auto" }}>
             <img
               src={beaker}
               alt="beaker"
@@ -119,52 +127,68 @@ export default function Cover() {
           </Box>
         </Box>
 
-        {/* Headline + tagline + levels */}
-        <Box sx={{ flex: "1 1 380px", textAlign: "center", minWidth: 0 }}>
-          <Typography
-            variant="h3"
-            fontWeight="bold"
-            gutterBottom
-            sx={{ fontSize: { xs: "1.6rem", sm: "2rem", md: "2.2rem" } }}
-          >
-            <Box component="span" sx={{ color: "#28d2e4", mr: 1 }}>
-              Understand
-            </Box>
-            <Box component="span" sx={{ color: "#fbdb75" }}>
-              STEM.
-            </Box>
-          </Typography>
+        {/* Physics + headline: rocket orbits the text (second on mobile, center on desktop) */}
+        <Box
+          sx={{
+            position: "relative",
+            flex: "1 1 380px",
+            minWidth: 0,
+            display: "flex",
+            justifyContent: "center",
+            py: { xs: 5, md: 2 },
+          }}
+        >
+          {/* Desktop: giant oval orbit */}
+          <OrbitingRocket rx={210} ry={95} size={72} duration={9} sx={{ display: { xs: "none", md: "block" } }} />
+          {/* Mobile: small orbit hugging the text closely */}
+          <OrbitingRocket rx={95} ry={42} size={34} duration={6} sx={{ display: { xs: "block", md: "none" } }} />
 
-          <Typography variant="h6" gutterBottom>
-            Don't just memorise it — personalised Mathematics, Physics, Chemistry and
-            Biology tutoring, taught by real teachers.
-          </Typography>
+          <Box sx={{ position: "relative", zIndex: 3, textAlign: "center", maxWidth: 460 }}>
+            <Typography
+              variant="h3"
+              fontWeight="bold"
+              gutterBottom
+              sx={{ fontSize: { xs: "1.6rem", sm: "2rem", md: "2.2rem" } }}
+            >
+              <Box component="span" sx={{ color: "#28d2e4", mr: 1 }}>
+                Understand
+              </Box>
+              <Box component="span" sx={{ color: "#fbdb75" }}>
+                STEM.
+              </Box>
+            </Typography>
 
-          <Stack
-            direction="row"
-            justifyContent="center"
-            spacing={2}
-            sx={{ mt: 2, flexWrap: "wrap" }}
-          >
-            <Typography variant="subtitle1" sx={{ color: "#28d2e4" }}>
-              GCSE
+            <Typography variant="h6" gutterBottom>
+              Don't just memorise it — personalised Mathematics, Physics, Chemistry and
+              Biology tutoring, taught by real teachers.
             </Typography>
-            <Typography variant="subtitle1" sx={{ color: "#fbdb75" }}>
-              |
-            </Typography>
-            <Typography variant="subtitle1" sx={{ color: "#f48d65" }}>
-              IGCSE
-            </Typography>
-            <Typography variant="subtitle1" sx={{ color: "#fbdb75" }}>
-              |
-            </Typography>
-            <Typography variant="subtitle1" sx={{ color: "#28d2e4" }}>
-              AS & A Level
-            </Typography>
-          </Stack>
+
+            <Stack
+              direction="row"
+              justifyContent="center"
+              spacing={2}
+              sx={{ mt: 2, flexWrap: "wrap" }}
+            >
+              <Typography variant="subtitle1" sx={{ color: "#28d2e4" }}>
+                GCSE
+              </Typography>
+              <Typography variant="subtitle1" sx={{ color: "#fbdb75" }}>
+                |
+              </Typography>
+              <Typography variant="subtitle1" sx={{ color: "#f48d65" }}>
+                IGCSE
+              </Typography>
+              <Typography variant="subtitle1" sx={{ color: "#fbdb75" }}>
+                |
+              </Typography>
+              <Typography variant="subtitle1" sx={{ color: "#28d2e4" }}>
+                AS & A Level
+              </Typography>
+            </Stack>
+          </Box>
         </Box>
 
-        {/* Biology: DNA */}
+        {/* Biology: DNA (right flank on desktop, last on mobile) */}
         <Box sx={{ flex: "0 0 auto", textAlign: "center" }}>
           <motion.img
             src={dna}
@@ -173,11 +197,6 @@ export default function Cover() {
             animate={{ rotate: 360 }}
             transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
           />
-        </Box>
-
-        {/* Physics: rocket */}
-        <Box sx={{ flex: "0 0 auto", textAlign: "center" }}>
-          <Rocket />
         </Box>
       </Box>
     </Box>
