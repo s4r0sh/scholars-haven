@@ -60,7 +60,7 @@ export default function Services() {
           </Box>
         </Typography>
         <Typography variant="body1" sx={{ lineHeight: 1.8, color: "#333" }}>
-          Whichever subject or level, sessions take one of these three shapes \u2014 built around
+          Whichever subject or level, sessions take one of these three shapes — built around
           where the student actually is.
         </Typography>
       </Box>
