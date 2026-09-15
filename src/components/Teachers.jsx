@@ -17,15 +17,16 @@ function TeacherProfile({ photo, alt, reverse, children }) {
         mb: { xs: 8, md: 10 },
       }}
     >
-      <Box sx={{ flex: 1, display: "flex", justifyContent: "center" }}>
+      <Box sx={{ flex: "0 0 auto", display: "flex", justifyContent: "center" }}>
         <Box
           component="img"
           src={photo}
           alt={alt}
           sx={{
-            width: "100%",
-            maxWidth: "350px",
-            aspectRatio: "350 / 403",
+            // explicit matched widths per breakpoint (not percentage-based) so both
+            // teachers render at exactly the same size regardless of source image dims
+            width: { xs: "220px", sm: "280px", md: "350px" },
+            height: { xs: "253px", sm: "322px", md: "403px" }, // fixed 350:403 ratio
             objectFit: "cover",
             objectPosition: "top center",
             borderRadius: "16px",
@@ -35,7 +36,7 @@ function TeacherProfile({ photo, alt, reverse, children }) {
           }}
         />
       </Box>
-      <Box sx={{ flex: 2 }}>{children}</Box>
+      <Box sx={{ flex: 2, minWidth: 0 }}>{children}</Box>
     </Box>
   );
 }
