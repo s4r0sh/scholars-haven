@@ -2,6 +2,38 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Primary SEO -->
+    <title>Scholars' Haven | Personalised STEM Tutoring — Maths, Physics, Chemistry & Biology</title>
+    <meta
+      name="description"
+      content="Personalised Mathematics, Physics, Chemistry and Biology tutoring for GCSE, IGCSE, AS & A Level students, taught by real teachers. Book a free assessment with Scholar's Haven."
+    />
+    <link rel="canonical" href="https://myscholarshaven.com/" />
+
+    <!-- Open Graph (Facebook, WhatsApp, LinkedIn link previews) -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Scholars' Haven" />
+    <meta property="og:title" content="Scholars' Haven | Personalised STEM Tutoring" />
+    <meta
+      property="og:description"
+      content="Personalised Mathematics, Physics, Chemistry and Biology tutoring for GCSE, IGCSE, AS & A Level students, taught by real teachers."
+    />
+    <meta property="og:url" content="https://myscholarshaven.com/" />
+    <meta property="og:image" content="https://myscholarshaven.com/logo.png" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Scholars' Haven | Personalised STEM Tutoring" />
+    <meta
+      name="twitter:description"
+      content="Personalised Mathematics, Physics, Chemistry and Biology tutoring for GCSE, IGCSE, AS & A Level students."
+    />
+    <meta name="twitter:image" content="https://myscholarshaven.com/logo.png" />
+
+    <meta name="theme-color" content="#28d2e4" />
+
     <!-- Montserrat -->
     <link
       href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap"
@@ -16,8 +48,38 @@
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="/logo.png" />
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Scholars' Haven</title>
+    <!-- 🔹 Google Analytics 4 — replace G-XXXXXXXXXX with the real GA4 Measurement ID before launch -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
+      gtag("config", "G-XXXXXXXXXX");
+    </script>
+
+    <!-- 🔹 Meta Pixel — replace XXXXXXXXXXXXXXX with the real Pixel ID before launch -->
+    <script>
+      !(function (f, b, e, v, n, t, s) {
+        if (f.fbq) return;
+        n = f.fbq = function () {
+          n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments);
+        };
+        if (!f._fbq) f._fbq = n;
+        n.push = n;
+        n.loaded = !0;
+        n.version = "2.0";
+        n.queue = [];
+        t = b.createElement(e);
+        t.async = !0;
+        t.src = v;
+        s = b.getElementsByTagName(e)[0];
+        s.parentNode.insertBefore(t, s);
+      })(window, document, "script", "https://connect.facebook.net/en_US/fbevents.js");
+      fbq("init", "XXXXXXXXXXXXXXX");
+      fbq("track", "PageView");
+    </script>
   </head>
   <body>
     <div id="root"></div>
