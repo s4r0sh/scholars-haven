@@ -1,7 +1,7 @@
 import React from "react";
 import { Box, Typography, Chip, Stack } from "@mui/material";
 import fatimaPhoto from "../assets/dp.jpg";
-import saroshPhoto from "../assets/sarosh.jpg";
+import saroshPhoto from "../assets/sarosh.webp";
 
 function TeacherProfile({ photo, alt, reverse, children }) {
   return (
@@ -18,15 +18,20 @@ function TeacherProfile({ photo, alt, reverse, children }) {
       }}
     >
       <Box sx={{ flex: 1, display: "flex", justifyContent: "center" }}>
-        <img
+        <Box
+          component="img"
           src={photo}
           alt={alt}
-          style={{
+          sx={{
             width: "100%",
             maxWidth: "350px",
+            aspectRatio: "350 / 403",
+            objectFit: "cover",
+            objectPosition: "top center",
             borderRadius: "16px",
             boxShadow: "0px 4px 20px rgba(0,0,0,0.1)",
             border: "4px solid #28d2e4",
+            display: "block",
           }}
         />
       </Box>
