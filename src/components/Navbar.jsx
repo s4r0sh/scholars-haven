@@ -13,7 +13,9 @@ import {
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import CloseIcon from "@mui/icons-material/Close";
+import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 import logo from "../assets/logo.jpg";
+import { whatsappLink } from "./WhatsAppButton";
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
@@ -81,7 +83,7 @@ export default function Navbar() {
         </Box>
 
         {/* Desktop Nav */}
-        <Box sx={{ display: { xs: "none", md: "flex" }, gap: 4 }}>
+        <Box sx={{ display: { xs: "none", md: "flex" }, gap: 4, alignItems: "center" }}>
           {navLinks.map((link) => (
             <Button
               key={link.id}
@@ -99,10 +101,27 @@ export default function Navbar() {
             </Button>
           ))}
           <Button
+            href={whatsappLink()}
+            target="_blank"
+            rel="noopener noreferrer"
+            startIcon={<WhatsAppIcon />}
+            sx={{
+              fontWeight: "bold",
+              color: "white",
+              bgcolor: "#25D366",
+              borderRadius: "30px",
+              px: 2,
+              textTransform: "none",
+              "&:hover": { bgcolor: "#1ebe57" },
+            }}
+          >
+            WhatsApp
+          </Button>
+          <Button
             href="https://calendly.com/scholars_haven/30min"
             target="_blank"
             sx={{
-              ml: 2,
+              ml: 0,
               fontWeight: "bold",
               color: "white",
               bgcolor: "#f48d65", // orange bg
@@ -168,6 +187,30 @@ export default function Navbar() {
                 </ListItem>
               ))}
 
+              {/* WhatsApp in Mobile */}
+              <ListItem
+                button
+                component="a"
+                href={whatsappLink()}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => {
+                  setActive("whatsapp");
+                  toggleDrawer(false)();
+                }}
+                sx={{
+                  borderRadius: "8px",
+                  mt: 2,
+                  textAlign: "center",
+                  bgcolor: active === "whatsapp" ? "transparent" : "#25D366",
+                  color: active === "whatsapp" ? "#25D366" : "white",
+                  border: active === "whatsapp" ? "2px solid #25D366" : "none",
+                  "&:hover": { opacity: 0.9 },
+                }}
+              >
+                <ListItemText primary="Message us on WhatsApp" />
+              </ListItem>
+
               {/* Free Demo in Mobile */}
               <ListItem
                 button
@@ -181,7 +224,7 @@ export default function Navbar() {
                 }}
                 sx={{
                   borderRadius: "8px",
-                  mt: 2,
+                  mt: 1,
                   textAlign: "center",
                   bgcolor: active === "demo" ? "transparent" : "#28d2e4",
                   color: active === "demo" ? "#28d2e4" : "white",
