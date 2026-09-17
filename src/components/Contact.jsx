@@ -9,7 +9,9 @@ import {
   Button,
   Alert,
   Stack,
+  Link,
 } from "@mui/material";
+import { whatsappLink } from "./WhatsAppButton";
 
 const fieldSx = {
   "& .MuiOutlinedInput-root": {
@@ -127,7 +129,16 @@ export default function Contact() {
           assessment — no obligation.
         </Typography>
         <Typography align="center" sx={{ color: "#999", fontSize: "0.9rem", mb: 3 }}>
-          Prefer WhatsApp? Message us directly instead.
+          Prefer WhatsApp?{" "}
+          <Link
+            href={whatsappLink()}
+            target="_blank"
+            rel="noopener noreferrer"
+            sx={{ color: "#25D366", fontWeight: 600 }}
+          >
+            Message us directly
+          </Link>{" "}
+          instead.
         </Typography>
 
         <Box
