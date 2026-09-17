@@ -1,11 +1,13 @@
 import React from "react";
 import Navbar from "./components/Navbar";
 import Cover from "./components/Cover";
-import About from "./components/About";
+import Subjects from "./components/Subjects";
+import Teachers from "./components/Teachers";
 import Services from "./components/Services";
 import Testimonials from "./components/Testimonials";
 import Contact from "./components/Contact";
 import Footer from "./components/Footer";
+import WhatsAppButton from "./components/WhatsAppButton";
 import { Box } from "@mui/material";
 
 export default function App() {
@@ -16,8 +18,11 @@ export default function App() {
       <Box id="cover">
         <Cover />
       </Box>
-      <Box id="about">
-        <About />
+      <Box id="subjects">
+        <Subjects />
+      </Box>
+      <Box id="teachers">
+        <Teachers />
       </Box>
       <Box id="services">
         <Services />
@@ -32,6 +37,8 @@ export default function App() {
       <Box id="footer">
         <Footer />
       </Box>
+
+      <WhatsAppButton />
     </Box>
   );
 }
