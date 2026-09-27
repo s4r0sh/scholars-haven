@@ -15,7 +15,7 @@ import MenuIcon from "@mui/icons-material/Menu";
 import CloseIcon from "@mui/icons-material/Close";
 import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 import logo from "../assets/logo.jpg";
-import { whatsappLink } from "./WhatsAppButton";
+import { whatsappLink, trackWhatsAppClick } from "./WhatsAppButton";
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
@@ -104,6 +104,7 @@ export default function Navbar() {
             href={whatsappLink()}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={trackWhatsAppClick}
             startIcon={<WhatsAppIcon />}
             sx={{
               fontWeight: "bold",
@@ -195,6 +196,7 @@ export default function Navbar() {
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => {
+                  trackWhatsAppClick();
                   setActive("whatsapp");
                   toggleDrawer(false)();
                 }}
