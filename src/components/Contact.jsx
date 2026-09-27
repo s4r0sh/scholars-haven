@@ -81,7 +81,7 @@ export default function Contact() {
           "service_j6jngvc", // 🔹 EmailJS service ID (unchanged)
           "template_awkavnu", // 🔹 EmailJS template ID (unchanged)
           formEl,
-          "ApSvG38LOjbNfsgU" // 🔹 EmailJS public key (unchanged)
+          "ApSvG38LO_jbNfsgU" // 🔹 EmailJS public key — fixed missing underscore
         )
         .then(
           (result) => {
