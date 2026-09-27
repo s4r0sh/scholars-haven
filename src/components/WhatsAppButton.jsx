@@ -9,10 +9,16 @@ export function whatsappLink(text = DEFAULT_TEXT) {
   return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(text)}`;
 }
 
-function trackWhatsAppClick() {
+// Exported so every WhatsApp entry point on the site (Navbar desktop/mobile, Contact
+// section link, this floating button) fires the same Meta Pixel + GA4 event.
+export function trackWhatsAppClick() {
   if (typeof window === "undefined") return;
-  if (window.fbq) window.fbq("track", "Contact");
-  if (window.gtag) window.gtag("event", "whatsapp_click");
+  try {
+    if (window.fbq) window.fbq("track", "Contact");
+    if (window.gtag) window.gtag("event", "whatsapp_click");
+  } catch (err) {
+    console.error("WhatsApp click tracking failed:", err);
+  }
 }
 
 // Floating WhatsApp button, fixed to the bottom-right of the viewport on every page.
