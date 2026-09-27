@@ -11,7 +11,7 @@ import {
   Stack,
   Link,
 } from "@mui/material";
-import { whatsappLink } from "./WhatsAppButton";
+import { whatsappLink, trackWhatsAppClick } from "./WhatsAppButton";
 
 const fieldSx = {
   "& .MuiOutlinedInput-root": {
@@ -48,10 +48,14 @@ export default function Contact() {
   const sendEmail = (e) => {
     e.preventDefault();
     setSending(true);
+    setStatus(null);
 
-    // Compose the full structured submission into the message body so it reaches
-    // the destination email regardless of which merge fields the EmailJS template
-    // itself references.
+    const formEl = e.target;
+
+    // Compose the full structured submission into the message field's actual DOM
+    // value right before sending, so emailjs.sendForm (which reads field values
+    // directly off the form) captures everything in one place, regardless of
+    // which merge fields the EmailJS template itself references.
     const composedMessage = [
       `Name: ${form.name} (${form.role})`,
       `Email: ${form.email}`,
@@ -64,46 +68,55 @@ export default function Contact() {
       .filter(Boolean)
       .join("\n");
 
-    emailjs
-      .send(
-        "service_j6jngvc", // 🔹 EmailJS service ID (unchanged)
-        "template_awkavnu", // 🔹 EmailJS template ID (unchanged)
-        {
-          name: form.name,
-          email: form.email,
-          message: composedMessage,
-        },
-        "ApSvG38LOjbNfsgU" // 🔹 EmailJS public key (unchanged)
-      )
-      .then(
-        () => {
-          setStatus("success");
+    const messageField = formEl.querySelector('[name="message"]');
+    if (messageField) messageField.value = composedMessage;
 
-          // Fire conversion events for the ad campaign (Meta Pixel + GA4).
-          // Safe no-ops until the real Pixel/GA4 IDs are added in index.html.
-          if (typeof window !== "undefined") {
-            if (window.fbq) {
-              window.fbq("track", "Lead", {
-                content_name: form.subject,
-                content_category: form.level,
-              });
+    // Reverted to sendForm (the method that was working before this site's redesign)
+    // instead of send() with manual params, which turned out not to be reliable
+    // with this EmailJS template. Wrapped in try/catch with console logging so a
+    // failure is never silent again.
+    try {
+      emailjs
+        .sendForm(
+          "service_j6jngvc", // 🔹 EmailJS service ID (unchanged)
+          "template_awkavnu", // 🔹 EmailJS template ID (unchanged)
+          formEl,
+          "ApSvG38LOjbNfsgU" // 🔹 EmailJS public key (unchanged)
+        )
+        .then(
+          (result) => {
+            console.log("EmailJS success:", result?.status, result?.text);
+            setStatus("success");
+
+            if (typeof window !== "undefined") {
+              if (window.fbq) {
+                window.fbq("track", "Lead", {
+                  content_name: form.subject,
+                  content_category: form.level,
+                });
+              }
+              if (window.gtag) {
+                window.gtag("event", "generate_lead", {
+                  subject: form.subject,
+                  level: form.level,
+                });
+              }
             }
-            if (window.gtag) {
-              window.gtag("event", "generate_lead", {
-                subject: form.subject,
-                level: form.level,
-              });
-            }
+
+            setForm(initialForm);
+            setSending(false);
+          },
+          (error) => {
+            console.error("EmailJS error:", error);
+            setStatus("error");
+            setSending(false);
           }
-
-          setForm(initialForm);
-          setSending(false);
-        },
-        () => {
-          setStatus("error");
-          setSending(false);
-        }
-      );
+        );
+    } catch (err) {
+      console.error("EmailJS threw synchronously:", err);
+      setStatus("error");
+      setSending(false);
+    }
   };
 
   return (
@@ -134,6 +147,7 @@ export default function Contact() {
             href={whatsappLink()}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={trackWhatsAppClick}
             sx={{ color: "#25D366", fontWeight: 600 }}
           >
             Message us directly
